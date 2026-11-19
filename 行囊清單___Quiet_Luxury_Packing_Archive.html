@@ -1,0 +1,1292 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="行囊清單" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="theme-color" id="metaThemeColor" content="#1C3128" />
+  <title>行囊清單 · Packing Archive</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,400&family=Inter:wght@300;400;500;600&family=Noto+Sans+TC:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            serif: ['"Cormorant Garamond"', 'Georgia', 'serif'],
+            sans: ['Inter', '"Noto Sans TC"', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    :root {
+      --bg-primary: #1C3128;
+      --bg-surface: #243D32;
+      --bg-surface-hover: #2B483B;
+      --bg-outer: #13221B;
+      --text-primary: #F3F1EC;
+      --text-secondary: #A3B5AC;
+      --text-muted: #768A80;
+      --border-hairline: rgba(243, 241, 236, 0.12);
+      --border-strong: rgba(243, 241, 236, 0.24);
+      --accent: #D4C5A9;
+      --accent-contrast: #1C3128;
+      --pill-active-bg: #F3F1EC;
+      --pill-active-text: #1C3128;
+      --check-bg: #F3F1EC;
+      --check-icon: #1C3128;
+      --modal-bg: #21382E;
+    }
+
+    * {
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: var(--bg-outer);
+      color: var(--text-primary);
+      font-family: 'Inter', 'Noto Sans TC', sans-serif;
+      margin: 0;
+      padding: 0;
+      overscroll-behavior-y: none;
+      transition: background-color 0.28s ease, color 0.28s ease;
+    }
+
+    #app {
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+      border-color: var(--border-hairline);
+      transition: background-color 0.28s ease, color 0.28s ease;
+    }
+
+    .theme-header {
+      background-color: var(--bg-primary);
+      border-bottom: 1px solid var(--border-hairline);
+      transition: background-color 0.28s ease;
+    }
+
+    .theme-surface {
+      background-color: var(--bg-surface);
+      border-color: var(--border-hairline);
+      transition: background-color 0.28s ease, border-color 0.28s ease;
+    }
+
+    .theme-row {
+      transition: background-color 0.18s ease;
+    }
+    .theme-row:active {
+      background-color: var(--bg-surface-hover);
+    }
+
+    .theme-divider {
+      border-color: var(--border-hairline);
+    }
+
+    .theme-text-primary {
+      color: var(--text-primary);
+    }
+
+    .theme-text-secondary {
+      color: var(--text-secondary);
+    }
+
+    .theme-text-muted {
+      color: var(--text-muted);
+    }
+
+    .theme-modal {
+      background-color: var(--modal-bg);
+      color: var(--text-primary);
+      border: 1px solid var(--border-strong);
+    }
+
+    .theme-btn-primary {
+      background-color: var(--accent);
+      color: var(--accent-contrast);
+    }
+
+    .theme-bottom-fade {
+      background: linear-gradient(to top, var(--bg-primary) 72%, transparent 100%);
+    }
+
+    /* Custom subtle scrollbar */
+    ::-webkit-scrollbar {
+      width: 4px;
+      height: 4px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: var(--border-strong);
+      border-radius: 9999px;
+    }
+    .tabular-nums {
+      font-variant-numeric: tabular-nums;
+    }
+    /* Diptyque-inspired refined oval emblem */
+    .oval-emblem {
+      border-radius: 50% / 50%;
+      border: 1px solid var(--border-strong);
+      box-shadow: inset 0 0 0 1px var(--border-hairline);
+    }
+    /* Custom checkbox animation */
+    .check-box {
+      transition: all 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .check-box svg {
+      transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.15s ease;
+    }
+    /* Smooth item & sheet animation */
+    @keyframes subtleFade {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-item {
+      animation: subtleFade 0.22s ease forwards;
+    }
+    .pb-safe {
+      padding-bottom: max(1.25rem, env(safe-area-inset-bottom));
+    }
+    .pt-safe {
+      padding-top: max(1.25rem, env(safe-area-inset-top));
+    }
+  </style>
+</head>
+<body class="antialiased">
+
+  <!-- Full-Bleed Mobile-First App Container -->
+  <div id="app" class="max-w-md mx-auto min-h-screen flex flex-col relative sm:border-x shadow-[0_0_60px_rgba(0,0,0,0.28)]">
+    
+    <!-- Google Keep-Inspired Top Bar & Category Header -->
+    <header class="theme-header px-5 pt-safe pb-4 sticky top-0 z-30">
+      <div class="flex items-center justify-between mb-4">
+        <!-- Left: Oval Emblem & Title -->
+        <div class="flex items-center gap-3">
+          <div class="oval-emblem w-10 h-12 flex flex-col items-center justify-center px-1 select-none shrink-0" style="background-color: var(--bg-surface);">
+            <span class="font-serif text-[8px] tracking-[0.18em] uppercase theme-text-secondary leading-none">LIST</span>
+            <span class="w-4 h-[0.5px] my-1" style="background-color: var(--border-strong);"></span>
+            <span class="font-serif italic text-[10px] tracking-wider theme-text-primary leading-none">01</span>
+          </div>
+          <div>
+            <h1 class="text-[18px] font-medium tracking-[0.06em] theme-text-primary leading-tight">行囊清單</h1>
+            <p id="headerSubtitle" class="text-[11px] theme-text-secondary tracking-wide mt-0.5 font-light">1) 托運 · 29 項</p>
+          </div>
+        </div>
+
+        <!-- Right: Google Keep-style Utility Action Icons (Search, Edit/Reorder, History, Settings) -->
+        <div class="flex items-center gap-0.5">
+          <button onclick="toggleSearch()" id="searchToggleBtn" title="搜尋物品"
+            class="p-2.5 rounded-full theme-text-secondary hover:opacity-100 transition-opacity">
+            <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+            </svg>
+          </button>
+          <button id="toggleEditModeBtn" onclick="toggleEditMode()" title="編輯與調整順序"
+            class="p-2.5 rounded-full theme-text-secondary transition-all">
+            <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125" />
+            </svg>
+          </button>
+          <button onclick="openHistoryModal()" title="過往旅程紀錄"
+            class="p-2.5 rounded-full theme-text-secondary transition-opacity relative">
+            <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span id="historyDot" class="hidden absolute top-2 right-2 w-1.5 h-1.5 rounded-full" style="background-color: var(--accent);"></span>
+          </button>
+          <button onclick="openSettingsModal()" title="設定與主題色彩"
+            class="p-2.5 rounded-full theme-text-secondary transition-opacity">
+            <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z" />
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- 3-Tab Segmented Control -->
+      <nav class="grid grid-cols-3 gap-1.5 p-1 rounded-xl theme-surface border" role="tablist">
+        <button onclick="switchTab('checked')" id="tab-checked" role="tab"
+          class="tab-btn py-2 px-2 rounded-lg text-center transition-all duration-200 flex flex-col items-center justify-center">
+          <span class="text-[13px] font-medium tracking-wide">1) 托運</span>
+          <span id="count-checked" class="text-[10px] tabular-nums opacity-75 mt-0.5">0 / 29</span>
+        </button>
+        <button onclick="switchTab('lastmin')" id="tab-lastmin" role="tab"
+          class="tab-btn py-2 px-2 rounded-lg text-center transition-all duration-200 flex flex-col items-center justify-center">
+          <span class="text-[13px] font-medium tracking-wide">2) Last Min</span>
+          <span id="count-lastmin" class="text-[10px] tabular-nums opacity-75 mt-0.5">0 / 8</span>
+        </button>
+        <button onclick="switchTab('carryon')" id="tab-carryon" role="tab"
+          class="tab-btn py-2 px-2 rounded-lg text-center transition-all duration-200 flex flex-col items-center justify-center">
+          <span class="text-[13px] font-medium tracking-wide">3) 手提行李</span>
+          <span id="count-carryon" class="text-[10px] tabular-nums opacity-75 mt-0.5">0 / 9</span>
+        </button>
+      </nav>
+
+      <!-- Subtle Minimalist Overall Progress Line -->
+      <div class="mt-3 flex items-center gap-3">
+        <div class="flex-1 h-[2px] rounded-full overflow-hidden" style="background-color: var(--border-hairline);">
+          <div id="overallProgressBar" class="h-full transition-all duration-300 ease-out" style="width: 0%; background-color: var(--accent);"></div>
+        </div>
+        <div class="text-[11px] tabular-nums theme-text-secondary shrink-0">
+          <span id="overallPercent" class="font-medium theme-text-primary">0%</span>
+          <span id="overallFraction" class="opacity-75 ml-1">0/46</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Collapsible Search Bar -->
+    <div id="searchBarContainer" class="hidden px-5 py-2.5 border-b theme-divider" style="background-color: var(--bg-surface);">
+      <div class="relative flex items-center">
+        <svg class="w-3.5 h-3.5 theme-text-muted absolute left-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+        </svg>
+        <input type="text" id="searchInput" oninput="handleSearch(this.value)" placeholder="篩選當前清單物品..."
+          class="w-full text-[13px] theme-text-primary pl-8 pr-8 py-1.5 rounded-lg border theme-divider focus:outline-none"
+          style="background-color: var(--bg-primary);" />
+        <button onclick="clearSearch()" id="clearSearchBtn" class="hidden absolute right-2.5 theme-text-secondary text-xs">✕</button>
+      </div>
+    </div>
+
+    <!-- Edit Mode Banner -->
+    <div id="editModeBanner" class="hidden px-5 py-2 border-b theme-divider flex items-center justify-between text-[12px]" style="background-color: var(--bg-surface);">
+      <span class="flex items-center gap-2 theme-text-primary">
+        <span class="w-1.5 h-1.5 rounded-full" style="background-color: var(--accent);"></span>
+        編輯模式：點擊文字可修改，右側可調整順序或刪除
+      </span>
+      <button onclick="toggleEditMode()" class="text-[12px] font-semibold underline underline-offset-2" style="color: var(--accent);">完成</button>
+    </div>
+
+    <!-- Main Full-Bleed Google Keep Checklist Area -->
+    <main class="flex-1 overflow-y-auto px-5 pt-3 pb-36">
+      
+      <!-- Section Title (Keep Note Title Style) -->
+      <div class="flex items-baseline justify-between mb-2 px-1">
+        <h2 id="activeTabTitle" class="text-[16px] font-medium tracking-wide theme-text-primary">行李清單（托運）</h2>
+        <span id="activeTabSubtitle" class="text-[11px] theme-text-muted">Checked Luggage</span>
+      </div>
+
+      <!-- Unchecked Items List (Flat Google Keep Full-Bleed Rows) -->
+      <div id="uncheckedList" class="divide-y theme-divider">
+        <!-- Items rendered dynamically via JS -->
+      </div>
+
+      <!-- Empty State when all unchecked items are packed -->
+      <div id="allPackedBanner" class="hidden py-8 px-4 my-2 text-center rounded-xl border theme-divider" style="background-color: var(--bg-surface);">
+        <div class="w-8 h-8 rounded-full flex items-center justify-center mx-auto mb-2" style="background-color: var(--border-hairline); color: var(--accent);">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+          </svg>
+        </div>
+        <p class="text-[13px] font-medium theme-text-primary">此分類物品已全數勾選完成</p>
+        <p class="text-[11px] theme-text-secondary mt-0.5">All items in this list are packed.</p>
+      </div>
+
+      <!-- Google Keep-Style Inline "+ 新增項目" Row -->
+      <form onsubmit="handleAddItem(event)" class="mt-1">
+        <div class="flex items-center py-3 px-2 border-b theme-divider transition-colors">
+          <span class="theme-text-secondary mr-3.5 text-lg font-light select-none leading-none">+</span>
+          <input type="text" id="newItemInput" placeholder="新增項目"
+            class="flex-1 bg-transparent text-[14.5px] theme-text-primary placeholder:opacity-50 focus:outline-none" />
+          <button type="submit" class="text-[12px] font-medium px-2.5 py-1 rounded-md transition-opacity hover:opacity-80" style="color: var(--accent);">
+            加入
+          </button>
+        </div>
+      </form>
+
+      <!-- Google Keep-Style Collapsible Checked Items Section -->
+      <div id="checkedSection" class="mt-6 hidden">
+        <button onclick="toggleCheckedCollapse()" class="w-full flex items-center justify-between py-2.5 px-1 theme-text-secondary hover:opacity-100 transition-opacity select-none">
+          <div class="flex items-center gap-2.5">
+            <svg id="checkedChevron" class="w-3.5 h-3.5 transition-transform duration-200" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+            </svg>
+            <span id="checkedCountLabel" class="text-[13px] font-normal tracking-wide tabular-nums">0 個已勾選項目</span>
+          </div>
+          <span class="text-[10px] uppercase tracking-[0.16em] font-serif theme-text-muted">PACKED</span>
+        </button>
+
+        <div id="checkedList" class="mt-1 divide-y theme-divider">
+          <!-- Checked items rendered dynamically via JS -->
+        </div>
+      </div>
+
+    </main>
+
+    <!-- Fixed Bottom Action Dock: "這次旅行完成" (Trip Complete & Reset) -->
+    <div class="fixed bottom-0 left-0 right-0 z-20 pointer-events-none">
+      <div class="max-w-md mx-auto px-5 pt-6 pb-safe theme-bottom-fade pointer-events-auto">
+        <button onclick="openCompleteTripModal()"
+          class="w-full theme-btn-primary active:scale-[0.99] py-3.5 px-5 rounded-xl shadow-[0_8px_24px_rgba(0,0,0,0.25)] transition-all duration-200 flex items-center justify-between group">
+          <div class="flex items-center gap-3">
+            <div class="w-7 h-7 rounded-full flex items-center justify-center border border-current/25">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
+              </svg>
+            </div>
+            <div class="text-left">
+              <div class="text-[14px] font-semibold tracking-[0.04em]">這次旅行完成</div>
+              <div class="text-[10px] opacity-75 tracking-wider">全部取消勾選 · 保留清單重複使用</div>
+            </div>
+          </div>
+          <span class="font-serif italic text-xs opacity-80 tracking-wider pr-1">Reset →</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Undo Toast Notification -->
+    <div id="undoToast" class="fixed bottom-24 left-1/2 -translate-x-1/2 z-40 hidden">
+      <div class="px-4 py-2.5 rounded-full shadow-xl border theme-divider flex items-center gap-3 text-[12px] whitespace-nowrap"
+        style="background-color: var(--bg-surface); color: var(--text-primary);">
+        <span id="toastMessage">已重置所有清單勾選狀態</span>
+        <button id="toastUndoBtn" onclick="undoLastReset()" class="font-semibold underline underline-offset-2" style="color: var(--accent);">
+          復原
+        </button>
+      </div>
+    </div>
+
+    <!-- Modal 1: Complete Trip & Uncheck All Confirmation -->
+    <div id="completeTripModal" class="fixed inset-0 z-50 hidden items-center justify-center p-5 bg-black/60 backdrop-blur-[2px]">
+      <div class="theme-modal w-full max-w-sm rounded-2xl shadow-2xl overflow-hidden animate-item">
+        <div class="px-6 py-5 text-center border-b theme-divider">
+          <div class="oval-emblem w-10 h-11 mx-auto mb-2.5 flex items-center justify-center" style="background-color: var(--bg-surface);">
+            <span class="font-serif italic text-xs theme-text-primary">Done</span>
+          </div>
+          <h3 class="text-[17px] font-medium tracking-wider theme-text-primary">確認這次旅行已完成？</h3>
+          <p class="text-[11px] theme-text-secondary mt-1">所有已勾選項目將恢復為未勾選，常駐物品完整保留</p>
+        </div>
+
+        <div class="p-5 space-y-4">
+          <div class="grid grid-cols-3 gap-2 p-3 rounded-xl border theme-divider text-center" style="background-color: var(--bg-surface);">
+            <div>
+              <div class="text-[10px] theme-text-secondary">1) 托運</div>
+              <div id="modalStatChecked" class="text-[13px] font-semibold theme-text-primary tabular-nums mt-0.5">0/29</div>
+            </div>
+            <div class="border-x theme-divider">
+              <div class="text-[10px] theme-text-secondary">2) Last Min</div>
+              <div id="modalStatLastmin" class="text-[13px] font-semibold theme-text-primary tabular-nums mt-0.5">0/8</div>
+            </div>
+            <div>
+              <div class="text-[10px] theme-text-secondary">3) 手提</div>
+              <div id="modalStatCarryon" class="text-[13px] font-semibold theme-text-primary tabular-nums mt-0.5">0/9</div>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-[11px] theme-text-secondary mb-1.5">選填：紀錄本次旅程名稱（存入歷史紀錄）</label>
+            <input type="text" id="tripNameInput" placeholder="例如：2026 峇里島 / 東京旅行..."
+              class="w-full text-[13px] theme-text-primary px-3 py-2 rounded-lg border theme-divider focus:outline-none"
+              style="background-color: var(--bg-primary);" />
+          </div>
+
+          <div class="flex gap-2.5 pt-1">
+            <button onclick="closeCompleteTripModal()"
+              class="flex-1 py-2.5 px-4 rounded-xl border theme-divider text-[13px] font-medium theme-text-secondary">
+              取消
+            </button>
+            <button onclick="confirmCompleteTrip()"
+              class="flex-[1.4] py-2.5 px-4 rounded-xl theme-btn-primary text-[13px] font-semibold tracking-wide shadow-sm">
+              完成並全部取消勾選
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal 2: Trip Archive History Log -->
+    <div id="historyModal" class="fixed inset-0 z-50 hidden items-center justify-center p-5 bg-black/60 backdrop-blur-[2px]">
+      <div class="theme-modal w-full max-w-sm rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[80vh] animate-item">
+        <div class="px-5 py-4 border-b theme-divider flex items-center justify-between">
+          <div>
+            <h3 class="text-[15px] font-medium tracking-wider theme-text-primary">過往旅程紀錄</h3>
+            <p class="text-[10px] theme-text-secondary font-serif tracking-widest uppercase mt-0.5">Travel Archive</p>
+          </div>
+          <button onclick="closeHistoryModal()" class="theme-text-secondary hover:opacity-100 p-1">✕</button>
+        </div>
+
+        <div id="historyListContainer" class="p-5 overflow-y-auto flex-1 space-y-2.5">
+          <!-- History items rendered here -->
+        </div>
+
+        <div class="px-5 py-3 border-t theme-divider flex items-center justify-end" style="background-color: var(--bg-surface);">
+          <button onclick="closeHistoryModal()" class="px-4 py-1.5 theme-btn-primary text-[12px] font-medium rounded-lg">
+            關閉
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal 3: Settings & Color Palette Switcher (Google Keep-inspired Theme Picker) -->
+    <div id="settingsModal" class="fixed inset-0 z-50 hidden items-end sm:items-center justify-center sm:p-5 bg-black/60 backdrop-blur-[2px]">
+      <div class="theme-modal w-full max-w-md sm:max-w-sm rounded-t-2xl sm:rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[88vh] animate-item">
+        <!-- Header -->
+        <div class="px-5 py-4 border-b theme-divider flex items-center justify-between">
+          <div>
+            <h3 class="text-[16px] font-medium tracking-wider theme-text-primary">設定</h3>
+            <p class="text-[11px] theme-text-secondary mt-0.5">背景色彩主題與主畫面設定</p>
+          </div>
+          <button onclick="closeSettingsModal()" class="w-8 h-8 rounded-full flex items-center justify-center theme-text-secondary hover:opacity-100" style="background-color: var(--bg-surface);">✕</button>
+        </div>
+
+        <!-- Scrollable Settings Body -->
+        <div class="p-5 overflow-y-auto space-y-6">
+          
+          <!-- Section 1: Theme Color Palette Switcher -->
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-[12px] font-medium tracking-wider theme-text-primary">背景主題色彩</span>
+              <span id="currentThemeNameLabel" class="text-[11px] theme-text-secondary">靜謐深綠</span>
+            </div>
+
+            <div id="themeSwatchesGrid" class="grid grid-cols-1 gap-2">
+              <!-- Theme swatches rendered dynamically via JS -->
+            </div>
+          </div>
+
+          <!-- Section 2: Add to Phone Home Screen Guide -->
+          <div class="pt-2 border-t theme-divider space-y-2.5">
+            <div class="text-[12px] font-medium tracking-wider theme-text-primary">加入手機主畫面（像原生 App 般開啟）</div>
+            
+            <div class="p-3.5 rounded-xl border theme-divider space-y-1.5" style="background-color: var(--bg-surface);">
+              <div class="text-[12px] font-medium theme-text-primary flex items-center justify-between">
+                <span>iPhone · Safari 瀏覽器</span>
+                <span class="text-[10px] font-serif uppercase tracking-wider theme-text-muted">iOS</span>
+              </div>
+              <ol class="text-[11.5px] theme-text-secondary space-y-1 list-decimal list-inside leading-relaxed">
+                <li>點擊底部中央的 <strong class="theme-text-primary">「分享」圖示</strong>（方框向上箭頭）</li>
+                <li>往下滑選擇 <strong class="theme-text-primary">「加入主畫面」</strong>並按右上角「新增」</li>
+              </ol>
+            </div>
+
+            <div class="p-3.5 rounded-xl border theme-divider space-y-1.5" style="background-color: var(--bg-surface);">
+              <div class="text-[12px] font-medium theme-text-primary flex items-center justify-between">
+                <span>Android · Chrome 瀏覽器</span>
+                <span class="text-[10px] font-serif uppercase tracking-wider theme-text-muted">Android</span>
+              </div>
+              <ol class="text-[11.5px] theme-text-secondary space-y-1 list-decimal list-inside leading-relaxed">
+                <li>點擊右上角 <strong class="theme-text-primary">「⋮」選單</strong> → 選擇 <strong class="theme-text-primary">「加到主畫面」</strong></li>
+              </ol>
+            </div>
+          </div>
+
+          <!-- Section 3: Template Management -->
+          <div class="pt-2 border-t theme-divider flex items-center justify-between">
+            <div>
+              <div class="text-[12px] font-medium theme-text-primary">清單模板重置</div>
+              <div class="text-[11px] theme-text-secondary">恢復為最初預設的物品項目</div>
+            </div>
+            <button onclick="resetToFactoryDefaults()" class="px-3 py-1.5 rounded-lg border theme-divider text-[11px] theme-text-secondary hover:opacity-100">
+              恢復預設
+            </button>
+          </div>
+
+        </div>
+
+        <div class="px-5 py-3.5 border-t theme-divider pb-safe" style="background-color: var(--bg-surface);">
+          <button onclick="closeSettingsModal()" class="w-full py-2.5 theme-btn-primary text-[13px] font-semibold rounded-xl">
+            完成
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // =========================================================================
+    // 1. CURATED QUIET LUXURY COLOR THEMES
+    // =========================================================================
+    const THEMES = {
+      deep_green: {
+        id: "deep_green",
+        name: "靜謐深綠",
+        en: "Serene Deep Green",
+        swatch: "#1C3128",
+        vars: {
+          "--bg-primary": "#1C3128",
+          "--bg-surface": "#243D32",
+          "--bg-surface-hover": "#2B483B",
+          "--bg-outer": "#13221B",
+          "--text-primary": "#F3F1EC",
+          "--text-secondary": "#A3B5AC",
+          "--text-muted": "#768A80",
+          "--border-hairline": "rgba(243, 241, 236, 0.12)",
+          "--border-strong": "rgba(243, 241, 236, 0.24)",
+          "--accent": "#D4C5A9",
+          "--accent-contrast": "#1C3128",
+          "--pill-active-bg": "#F3F1EC",
+          "--pill-active-text": "#1C3128",
+          "--check-bg": "#F3F1EC",
+          "--check-icon": "#1C3128",
+          "--modal-bg": "#21382E"
+        }
+      },
+      warm_linen: {
+        id: "warm_linen",
+        name: "溫潤亞麻",
+        en: "Warm Linen",
+        swatch: "#F6F4EF",
+        vars: {
+          "--bg-primary": "#F6F4EF",
+          "--bg-surface": "#ECE9E1",
+          "--bg-surface-hover": "#E3DFD5",
+          "--bg-outer": "#E5E1D8",
+          "--text-primary": "#1C2A24",
+          "--text-secondary": "#57655E",
+          "--text-muted": "#87928C",
+          "--border-hairline": "rgba(28, 42, 36, 0.10)",
+          "--border-strong": "rgba(28, 42, 36, 0.22)",
+          "--accent": "#1E352B",
+          "--accent-contrast": "#F6F4EF",
+          "--pill-active-bg": "#1E352B",
+          "--pill-active-text": "#F6F4EF",
+          "--check-bg": "#1E352B",
+          "--check-icon": "#F6F4EF",
+          "--modal-bg": "#F9F8F4"
+        }
+      },
+      midnight_blue: {
+        id: "midnight_blue",
+        name: "深夜靛藍",
+        en: "Midnight Deep Blue",
+        swatch: "#1A2634",
+        vars: {
+          "--bg-primary": "#1A2634",
+          "--bg-surface": "#223142",
+          "--bg-surface-hover": "#2A3C50",
+          "--bg-outer": "#111923",
+          "--text-primary": "#F1F3F5",
+          "--text-secondary": "#9FB0C2",
+          "--text-muted": "#6E8195",
+          "--border-hairline": "rgba(241, 243, 245, 0.12)",
+          "--border-strong": "rgba(241, 243, 245, 0.24)",
+          "--accent": "#D6CBB8",
+          "--accent-contrast": "#1A2634",
+          "--pill-active-bg": "#F1F3F5",
+          "--pill-active-text": "#1A2634",
+          "--check-bg": "#F1F3F5",
+          "--check-icon": "#1A2634",
+          "--modal-bg": "#1F2D3D"
+        }
+      },
+      warm_taupe: {
+        id: "warm_taupe",
+        name: "大地陶褐",
+        en: "Warm Taupe",
+        swatch: "#2C2623",
+        vars: {
+          "--bg-primary": "#2C2623",
+          "--bg-surface": "#37302C",
+          "--bg-surface-hover": "#423A35",
+          "--bg-outer": "#1E1A18",
+          "--text-primary": "#F4F1EC",
+          "--text-secondary": "#B8AFA6",
+          "--text-muted": "#877E76",
+          "--border-hairline": "rgba(244, 241, 236, 0.12)",
+          "--border-strong": "rgba(244, 241, 236, 0.24)",
+          "--accent": "#DFD1BC",
+          "--accent-contrast": "#2C2623",
+          "--pill-active-bg": "#F4F1EC",
+          "--pill-active-text": "#2C2623",
+          "--check-bg": "#F4F1EC",
+          "--check-icon": "#2C2623",
+          "--modal-bg": "#332C28"
+        }
+      },
+      misted_sage: {
+        id: "misted_sage",
+        name: "霧灰鼠尾草",
+        en: "Misted Sage",
+        swatch: "#2F3E37",
+        vars: {
+          "--bg-primary": "#2F3E37",
+          "--bg-surface": "#394B43",
+          "--bg-surface-hover": "#43574E",
+          "--bg-outer": "#222E28",
+          "--text-primary": "#F4F2ED",
+          "--text-secondary": "#B2C0B9",
+          "--text-muted": "#82928A",
+          "--border-hairline": "rgba(244, 242, 237, 0.13)",
+          "--border-strong": "rgba(244, 242, 237, 0.25)",
+          "--accent": "#E2D5BE",
+          "--accent-contrast": "#2F3E37",
+          "--pill-active-bg": "#F4F2ED",
+          "--pill-active-text": "#2F3E37",
+          "--check-bg": "#F4F2ED",
+          "--check-icon": "#2F3E37",
+          "--modal-bg": "#35463E"
+        }
+      }
+    };
+
+    // =========================================================================
+    // 2. DEFAULT PACKING DATA
+    // =========================================================================
+    const DEFAULT_DATA = {
+      checked: [
+        "拖鞋",
+        "化妝包",
+        "保養包",
+        "棉條/衛生棉",
+        "隱形眼鏡",
+        "眼鏡",
+        "Action4/ Tray",
+        "充電器",
+        "水壺",
+        "褪黑素/維他命",
+        "保險套",
+        "Camper鞋子",
+        "香水",
+        "牙刷",
+        "浮潛呼吸管",
+        "電腦表充電",
+        "Water shoe",
+        "衣服4套",
+        "襪子3套",
+        "內衣褲3套",
+        "睡衣睡褲",
+        "墨鏡 (在車裡)",
+        "耳環·項鏈",
+        "婚紗",
+        "安全褲",
+        "Ring Box",
+        "Bikini",
+        "NUBRA (台灣)",
+        "bridal shoe (Taiwan)"
+      ],
+      lastmin: [
+        "牙刷 / 洗面乳（晨間使用後）",
+        "手機充電器 / 行動電源",
+        "眼鏡 / 隱形眼鏡盒",
+        "隨身水壺裝水",
+        "餵貓 / 檢查自動餵食器與飲水機",
+        "清理垃圾與廚餘",
+        "關閉非必要電源與確認門窗",
+        "家門鑰匙 / 錢包"
+      ],
+      carryon: [
+        "護照 / 證件 / 簽證文件",
+        "錢包 / 信用卡 / 外幣現金",
+        "iPhone / AirPods",
+        "相機 / 記憶卡 / 備用電池",
+        "筆電 / iPad 與充電線",
+        "隨身保養 / 護手霜 / 潤唇膏",
+        "頸枕 / 眼罩 / 降噪耳塞",
+        "薄外套 / 披肩",
+        "隨身常備藥品 / 暈車藥"
+      ]
+    };
+
+    const TAB_META = {
+      checked: {
+        title: "行李清單（托運）",
+        short: "1) 托運",
+        subtitle: "Checked Luggage"
+      },
+      lastmin: {
+        title: "Last Min 最後確認",
+        short: "2) Last Min",
+        subtitle: "Final Departure Check"
+      },
+      carryon: {
+        title: "手提行李",
+        short: "3) 手提行李",
+        subtitle: "Carry-On Essentials"
+      }
+    };
+
+    const STORAGE_KEY = "quiet_luxury_packing_archive_v1";
+    const HISTORY_KEY = "quiet_luxury_packing_history_v1";
+    const THEME_KEY = "quiet_luxury_packing_theme_v1";
+
+    // =========================================================================
+    // 3. APPLICATION STATE
+    // =========================================================================
+    let state = {
+      activeTab: "checked",
+      editMode: false,
+      checkedCollapsed: false,
+      searchQuery: "",
+      themeId: "deep_green",
+      lists: {
+        checked: [],
+        lastmin: [],
+        carryon: []
+      }
+    };
+
+    let historyLog = [];
+    let backupSnapshotBeforeReset = null;
+    let toastTimeout = null;
+
+    function uid() {
+      return Date.now().toString(36) + Math.random().toString(36).substring(2, 7);
+    }
+
+    function applyTheme(themeId, persist = true) {
+      const theme = THEMES[themeId] || THEMES.deep_green;
+      state.themeId = theme.id;
+
+      const root = document.documentElement;
+      Object.entries(theme.vars).forEach(([cssVar, val]) => {
+        root.style.setProperty(cssVar, val);
+      });
+
+      // Update mobile browser status bar color seamlessly
+      const metaTheme = document.getElementById("metaThemeColor");
+      if (metaTheme) {
+        metaTheme.setAttribute("content", theme.swatch);
+      }
+
+      if (persist) {
+        try {
+          localStorage.setItem(THEME_KEY, theme.id);
+        } catch (e) {
+          console.error("Theme save error:", e);
+        }
+      }
+
+      renderThemeSwatches();
+    }
+
+    function initApp() {
+      try {
+        const savedTheme = localStorage.getItem(THEME_KEY);
+        if (savedTheme && THEMES[savedTheme]) {
+          applyTheme(savedTheme, false);
+        } else {
+          applyTheme("deep_green", false);
+        }
+
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (parsed && parsed.checked && parsed.lastmin && parsed.carryon) {
+            state.lists = parsed;
+          } else {
+            seedDefaultLists();
+          }
+        } else {
+          seedDefaultLists();
+        }
+
+        const savedHistory = localStorage.getItem(HISTORY_KEY);
+        if (savedHistory) {
+          historyLog = JSON.parse(savedHistory) || [];
+        }
+      } catch (e) {
+        console.error("Storage load error, using defaults:", e);
+        applyTheme("deep_green", false);
+        seedDefaultLists();
+      }
+
+      renderAll();
+    }
+
+    function seedDefaultLists() {
+      state.lists = {
+        checked: DEFAULT_DATA.checked.map(text => ({ id: uid(), text, checked: false })),
+        lastmin: DEFAULT_DATA.lastmin.map(text => ({ id: uid(), text, checked: false })),
+        carryon: DEFAULT_DATA.carryon.map(text => ({ id: uid(), text, checked: false }))
+      };
+      saveState();
+    }
+
+    function saveState() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state.lists));
+      } catch (e) {
+        console.error("Failed to save state:", e);
+      }
+    }
+
+    function saveHistory() {
+      try {
+        localStorage.setItem(HISTORY_KEY, JSON.stringify(historyLog));
+      } catch (e) {
+        console.error("Failed to save history:", e);
+      }
+    }
+
+    // =========================================================================
+    // 4. INTERACTION HANDLERS
+    // =========================================================================
+    function switchTab(tabKey) {
+      state.activeTab = tabKey;
+      renderAll();
+    }
+
+    function toggleItem(id) {
+      if (state.editMode) return;
+      const list = state.lists[state.activeTab];
+      const item = list.find(i => i.id === id);
+      if (item) {
+        item.checked = !item.checked;
+        saveState();
+        renderAll();
+      }
+    }
+
+    function handleAddItem(e) {
+      e.preventDefault();
+      const input = document.getElementById("newItemInput");
+      const text = input.value.trim();
+      if (!text) return;
+
+      state.lists[state.activeTab].push({
+        id: uid(),
+        text: text,
+        checked: false
+      });
+
+      input.value = "";
+      saveState();
+      renderAll();
+    }
+
+    function deleteItem(id, event) {
+      if (event) event.stopPropagation();
+      state.lists[state.activeTab] = state.lists[state.activeTab].filter(i => i.id !== id);
+      saveState();
+      renderAll();
+    }
+
+    function updateItemText(id, newText) {
+      const trimmed = newText.trim();
+      if (!trimmed) {
+        renderAll();
+        return;
+      }
+      const item = state.lists[state.activeTab].find(i => i.id === id);
+      if (item && item.text !== trimmed) {
+        item.text = trimmed;
+        saveState();
+      }
+    }
+
+    function moveItem(id, direction, event) {
+      if (event) event.stopPropagation();
+      const list = state.lists[state.activeTab];
+      const idx = list.findIndex(i => i.id === id);
+      if (idx === -1) return;
+
+      const targetIdx = idx + direction;
+      if (targetIdx < 0 || targetIdx >= list.length) return;
+
+      const temp = list[idx];
+      list[idx] = list[targetIdx];
+      list[targetIdx] = temp;
+
+      saveState();
+      renderAll();
+    }
+
+    function toggleEditMode() {
+      state.editMode = !state.editMode;
+      renderAll();
+    }
+
+    function toggleCheckedCollapse() {
+      state.checkedCollapsed = !state.checkedCollapsed;
+      renderAll();
+    }
+
+    function toggleSearch() {
+      const container = document.getElementById("searchBarContainer");
+      const input = document.getElementById("searchInput");
+      if (container.classList.contains("hidden")) {
+        container.classList.remove("hidden");
+        input.focus();
+      } else {
+        container.classList.add("hidden");
+        clearSearch();
+      }
+    }
+
+    function handleSearch(val) {
+      state.searchQuery = val.trim().toLowerCase();
+      document.getElementById("clearSearchBtn").classList.toggle("hidden", !state.searchQuery);
+      renderLists();
+    }
+
+    function clearSearch() {
+      state.searchQuery = "";
+      const input = document.getElementById("searchInput");
+      if (input) input.value = "";
+      document.getElementById("clearSearchBtn").classList.add("hidden");
+      renderLists();
+    }
+
+    // =========================================================================
+    // 5. "這次旅行完成" (COMPLETE TRIP & RESET) WORKFLOW
+    // =========================================================================
+    function openCompleteTripModal() {
+      const cStats = getListStats("checked");
+      const lStats = getListStats("lastmin");
+      const caStats = getListStats("carryon");
+
+      document.getElementById("modalStatChecked").textContent = `${cStats.checked}/${cStats.total}`;
+      document.getElementById("modalStatLastmin").textContent = `${lStats.checked}/${lStats.total}`;
+      document.getElementById("modalStatCarryon").textContent = `${caStats.checked}/${caStats.total}`;
+
+      const modal = document.getElementById("completeTripModal");
+      modal.classList.remove("hidden");
+      modal.classList.add("flex");
+    }
+
+    function closeCompleteTripModal() {
+      const modal = document.getElementById("completeTripModal");
+      modal.classList.add("hidden");
+      modal.classList.remove("flex");
+    }
+
+    function confirmCompleteTrip() {
+      backupSnapshotBeforeReset = JSON.parse(JSON.stringify(state.lists));
+
+      const totalPacked = ["checked", "lastmin", "carryon"].reduce(
+        (sum, key) => sum + state.lists[key].filter(i => i.checked).length,
+        0
+      );
+      const totalAll = ["checked", "lastmin", "carryon"].reduce(
+        (sum, key) => sum + state.lists[key].length,
+        0
+      );
+
+      const tripInput = document.getElementById("tripNameInput");
+      const tripTitle = tripInput.value.trim() || "旅行歸檔";
+      const now = new Date();
+      const dateStr = `${now.getFullYear()}.${String(now.getMonth() + 1).padStart(2, "0")}.${String(now.getDate()).padStart(2, "0")}`;
+
+      historyLog.unshift({
+        id: uid(),
+        title: tripTitle,
+        date: dateStr,
+        packed: totalPacked,
+        total: totalAll
+      });
+      saveHistory();
+      tripInput.value = "";
+
+      ["checked", "lastmin", "carryon"].forEach(key => {
+        state.lists[key].forEach(item => {
+          item.checked = false;
+        });
+      });
+
+      saveState();
+      closeCompleteTripModal();
+      renderAll();
+      showToast("這次旅行已完成 · 所有清單已取消勾選", true);
+    }
+
+    function undoLastReset() {
+      if (!backupSnapshotBeforeReset) return;
+      state.lists = backupSnapshotBeforeReset;
+      backupSnapshotBeforeReset = null;
+      saveState();
+      renderAll();
+      hideToast();
+    }
+
+    function showToast(msg, canUndo = false) {
+      const toast = document.getElementById("undoToast");
+      document.getElementById("toastMessage").textContent = msg;
+      document.getElementById("toastUndoBtn").classList.toggle("hidden", !canUndo);
+      toast.classList.remove("hidden");
+
+      if (toastTimeout) clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => {
+        hideToast();
+      }, 6500);
+    }
+
+    function hideToast() {
+      document.getElementById("undoToast").classList.add("hidden");
+    }
+
+    // =========================================================================
+    // 6. SETTINGS & HISTORY MODALS
+    // =========================================================================
+    function openSettingsModal() {
+      renderThemeSwatches();
+      const modal = document.getElementById("settingsModal");
+      modal.classList.remove("hidden");
+      modal.classList.add("flex");
+    }
+
+    function closeSettingsModal() {
+      const modal = document.getElementById("settingsModal");
+      modal.classList.add("hidden");
+      modal.classList.remove("flex");
+    }
+
+    function renderThemeSwatches() {
+      const container = document.getElementById("themeSwatchesGrid");
+      const currentLabel = document.getElementById("currentThemeNameLabel");
+      if (!container) return;
+
+      const activeTheme = THEMES[state.themeId] || THEMES.deep_green;
+      if (currentLabel) currentLabel.textContent = activeTheme.name;
+
+      container.innerHTML = Object.values(THEMES).map(t => {
+        const isSelected = t.id === state.themeId;
+        return `
+          <button onclick="applyTheme('${t.id}')"
+            class="flex items-center justify-between px-3.5 py-2.5 rounded-xl border transition-all text-left"
+            style="background-color: var(--bg-surface); border-color: ${isSelected ? 'var(--accent)' : 'var(--border-hairline)'};">
+            <div class="flex items-center gap-3">
+              <span class="w-6 h-6 rounded-full border shrink-0 shadow-inner flex items-center justify-center"
+                style="background-color: ${t.swatch}; border-color: rgba(128,128,128,0.35);">
+                ${isSelected ? `<span class="w-2 h-2 rounded-full" style="background-color: ${t.vars['--text-primary']};"></span>` : ''}
+              </span>
+              <div>
+                <div class="text-[13px] font-medium theme-text-primary leading-tight">${t.name}</div>
+                <div class="text-[10px] font-serif tracking-wider theme-text-muted mt-0.5">${t.en}</div>
+              </div>
+            </div>
+            <span class="text-[11px] font-medium" style="color: ${isSelected ? 'var(--accent)' : 'transparent'};">
+              使用中
+            </span>
+          </button>
+        `;
+      }).join("");
+    }
+
+    function openHistoryModal() {
+      renderHistory();
+      const modal = document.getElementById("historyModal");
+      modal.classList.remove("hidden");
+      modal.classList.add("flex");
+    }
+
+    function closeHistoryModal() {
+      const modal = document.getElementById("historyModal");
+      modal.classList.add("hidden");
+      modal.classList.remove("flex");
+    }
+
+    function renderHistory() {
+      const container = document.getElementById("historyListContainer");
+      if (historyLog.length === 0) {
+        container.innerHTML = `
+          <div class="text-center py-8 theme-text-secondary">
+            <p class="text-[13px]">尚無完成的旅程紀錄</p>
+            <p class="text-[11px] theme-text-muted mt-1">點擊底部「這次旅行完成」即可自動歸檔</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = historyLog.map(entry => `
+        <div class="p-3.5 rounded-xl border theme-divider flex items-center justify-between" style="background-color: var(--bg-surface);">
+          <div>
+            <div class="text-[13px] font-medium theme-text-primary">${escapeHtml(entry.title)}</div>
+            <div class="text-[11px] theme-text-muted font-serif tracking-wider mt-0.5">${entry.date}</div>
+          </div>
+          <div class="text-right">
+            <span class="text-[11px] px-2.5 py-0.5 rounded-full font-medium tabular-nums border theme-divider theme-text-primary">
+              ${entry.packed} / ${entry.total} 項
+            </span>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    function resetToFactoryDefaults() {
+      backupSnapshotBeforeReset = JSON.parse(JSON.stringify(state.lists));
+      seedDefaultLists();
+      closeSettingsModal();
+      closeHistoryModal();
+      renderAll();
+      showToast("已恢復為初始預設清單模板", true);
+    }
+
+    // =========================================================================
+    // 7. RENDERING ENGINE
+    // =========================================================================
+    function getListStats(tabKey) {
+      const list = state.lists[tabKey] || [];
+      const total = list.length;
+      const checked = list.filter(i => i.checked).length;
+      return { total, checked };
+    }
+
+    function renderAll() {
+      renderHeaderAndTabs();
+      renderLists();
+    }
+
+    function renderHeaderAndTabs() {
+      const keys = ["checked", "lastmin", "carryon"];
+      let totalAll = 0;
+      let checkedAll = 0;
+
+      keys.forEach(k => {
+        const s = getListStats(k);
+        totalAll += s.total;
+        checkedAll += s.checked;
+        document.getElementById(`count-${k}`).textContent = `${s.checked} / ${s.total}`;
+
+        const btn = document.getElementById(`tab-${k}`);
+        if (state.activeTab === k) {
+          btn.style.backgroundColor = "var(--pill-active-bg)";
+          btn.style.color = "var(--pill-active-text)";
+          btn.className = "tab-btn py-2 px-2 rounded-lg text-center transition-all duration-200 flex flex-col items-center justify-center shadow-sm";
+        } else {
+          btn.style.backgroundColor = "transparent";
+          btn.style.color = "var(--text-secondary)";
+          btn.className = "tab-btn py-2 px-2 rounded-lg text-center transition-all duration-200 flex flex-col items-center justify-center hover:opacity-100";
+        }
+      });
+
+      const pct = totalAll === 0 ? 0 : Math.round((checkedAll / totalAll) * 100);
+      document.getElementById("overallPercent").textContent = `${pct}%`;
+      document.getElementById("overallFraction").textContent = `${checkedAll}/${totalAll}`;
+      document.getElementById("overallProgressBar").style.width = `${pct}%`;
+
+      // Active subheader & header subtitle
+      const meta = TAB_META[state.activeTab];
+      const activeStats = getListStats(state.activeTab);
+      document.getElementById("headerSubtitle").textContent = `${meta.short} · ${activeStats.checked}/${activeStats.total} 項`;
+      document.getElementById("activeTabTitle").textContent = meta.title;
+      document.getElementById("activeTabSubtitle").textContent = meta.subtitle;
+
+      // Edit mode UI state
+      const editBtn = document.getElementById("toggleEditModeBtn");
+      const editBanner = document.getElementById("editModeBanner");
+      if (state.editMode) {
+        editBtn.style.backgroundColor = "var(--pill-active-bg)";
+        editBtn.style.color = "var(--pill-active-text)";
+        editBanner.classList.remove("hidden");
+      } else {
+        editBtn.style.backgroundColor = "transparent";
+        editBtn.style.color = "var(--text-secondary)";
+        editBanner.classList.add("hidden");
+      }
+
+      document.getElementById("historyDot").classList.toggle("hidden", historyLog.length === 0);
+    }
+
+    function renderLists() {
+      const currentList = state.lists[state.activeTab] || [];
+      const filteredList = state.searchQuery
+        ? currentList.filter(i => i.text.toLowerCase().includes(state.searchQuery))
+        : currentList;
+
+      const uncheckedItems = filteredList.filter(i => !i.checked);
+      const checkedItems = filteredList.filter(i => i.checked);
+
+      const uncheckedContainer = document.getElementById("uncheckedList");
+      const allPackedBanner = document.getElementById("allPackedBanner");
+
+      if (uncheckedItems.length === 0) {
+        uncheckedContainer.classList.add("hidden");
+        if (currentList.length > 0 && !state.searchQuery) {
+          allPackedBanner.classList.remove("hidden");
+        } else {
+          allPackedBanner.classList.add("hidden");
+        }
+      } else {
+        uncheckedContainer.classList.remove("hidden");
+        allPackedBanner.classList.add("hidden");
+        uncheckedContainer.innerHTML = uncheckedItems.map(item => createItemRowHTML(item, false)).join("");
+      }
+
+      const checkedSection = document.getElementById("checkedSection");
+      const checkedContainer = document.getElementById("checkedList");
+      const checkedChevron = document.getElementById("checkedChevron");
+
+      if (checkedItems.length === 0) {
+        checkedSection.classList.add("hidden");
+      } else {
+        checkedSection.classList.remove("hidden");
+        document.getElementById("checkedCountLabel").textContent = `${checkedItems.length} 個已勾選項目`;
+        checkedChevron.style.transform = state.checkedCollapsed ? "rotate(-90deg)" : "rotate(0deg)";
+
+        if (state.checkedCollapsed) {
+          checkedContainer.classList.add("hidden");
+        } else {
+          checkedContainer.classList.remove("hidden");
+          checkedContainer.innerHTML = checkedItems.map(item => createItemRowHTML(item, true)).join("");
+        }
+      }
+    }
+
+    function createItemRowHTML(item, isChecked) {
+      if (state.editMode) {
+        return `
+          <div class="flex items-center justify-between py-2.5 px-1 gap-2">
+            <input type="text" value="${escapeHtml(item.text)}"
+              onblur="updateItemText('${item.id}', this.value)"
+              onkeydown="if(event.key==='Enter'){this.blur();}"
+              class="flex-1 text-[14px] theme-text-primary px-2.5 py-1.5 rounded-lg border theme-divider focus:outline-none"
+              style="background-color: var(--bg-surface);" />
+            <div class="flex items-center gap-0.5 shrink-0">
+              <button onclick="moveItem('${item.id}', -1, event)" class="p-1.5 theme-text-secondary hover:opacity-100" title="上移">↑</button>
+              <button onclick="moveItem('${item.id}', 1, event)" class="p-1.5 theme-text-secondary hover:opacity-100" title="下移">↓</button>
+              <button onclick="deleteItem('${item.id}', event)" class="p-1.5 theme-text-secondary hover:text-red-400" title="刪除">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        `;
+      }
+
+      return `
+        <div onclick="toggleItem('${item.id}')"
+          class="theme-row group flex items-center justify-between py-3.5 px-2 rounded-lg cursor-pointer select-none">
+          <div class="flex items-center gap-3.5 min-w-0">
+            <!-- Google Keep-inspired Crisp Square Checkbox -->
+            <div class="check-box w-[19px] h-[19px] rounded-[4px] flex items-center justify-center shrink-0"
+              style="${isChecked
+                ? 'background-color: var(--check-bg); border: 1.5px solid var(--check-bg); color: var(--check-icon);'
+                : 'background-color: transparent; border: 1.5px solid var(--text-secondary);'}">
+              <svg class="w-3 h-3 ${isChecked ? 'opacity-100 scale-100' : 'opacity-0 scale-50'}" fill="none" stroke="currentColor" stroke-width="2.6" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+              </svg>
+            </div>
+
+            <!-- Item Label -->
+            <span class="text-[14.5px] leading-snug truncate transition-all ${
+              isChecked
+                ? 'line-through theme-text-muted font-light'
+                : 'theme-text-primary font-normal'
+            }">
+              ${escapeHtml(item.text)}
+            </span>
+          </div>
+
+          <!-- Subtle Delete Button -->
+          <button onclick="deleteItem('${item.id}', event)" title="移除此項"
+            class="opacity-0 group-hover:opacity-100 focus:opacity-100 p-1 theme-text-muted hover:text-red-400 transition-opacity ml-2">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+      `;
+    }
+
+    function escapeHtml(str) {
+      return str
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    window.addEventListener("DOMContentLoaded", initApp);
+  </script>
+</body>
+</html>
